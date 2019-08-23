@@ -1,5 +1,3 @@
-require('dotenv-safe').config();
-
-module.exports = {
+export default {
   mongoUrl: process.env.MONGO_URL
 };
