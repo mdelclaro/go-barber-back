@@ -1,8 +1,11 @@
+import { startOfHour, parseISO, isBefore, addHours, format } from 'date-fns';
+import * as Yup from 'yup';
+import { Op } from 'sequelize';
+
 import Appointment from '../models/Appointment';
 import User from '../models/User';
-import { startOfHour, parseISO, isBefore, addHours } from 'date-fns';
-import * as Yup from 'yup';
 import File from '../models/File';
+import Notification from '../schemas/Notification';
 
 class AppointmentController {
   async index(req, res) {
@@ -75,7 +78,7 @@ class AppointmentController {
       where: {
         provider_id,
         cancelled_at: null,
-        date: { $between: [hourStart, hourEnd] }
+        date: { [Op.between]: [hourStart, hourEnd] }
       }
     });
 
@@ -89,6 +92,18 @@ class AppointmentController {
       user_id: req.userId,
       provider_id,
       date
+    });
+
+    /**
+     * Notify provider
+     */
+
+    const user = await User.findByPk(req.userId);
+    const formattedDate = format(hourStart, "'on' MMMM do', at' hh':'mma");
+
+    await Notification.create({
+      content: `New appointment from ${user.name} ${formattedDate} `,
+      user: provider_id
     });
 
     return res.json(appointment);
