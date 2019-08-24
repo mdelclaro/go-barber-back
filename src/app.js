@@ -1,4 +1,4 @@
-require('dotenv-safe').config();
+import 'dotenv-safe/config';
 
 import express from 'express';
 import path from 'path';
